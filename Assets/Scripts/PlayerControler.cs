@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerControler : MonoBehaviour
@@ -8,6 +10,10 @@ public class PlayerControler : MonoBehaviour
     public float flySpeed = 5f;
 
     GameObject levelManagerObject;
+    //stan oslon w procentach (1=100%)
+    float shieldCapacity = 1;
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -64,6 +70,10 @@ public class PlayerControler : MonoBehaviour
         Vector3 target = levelManagerObject.GetComponent<LevelManager>().exitPosition;
         //obroc znacznik w strone wyjscia
         transform.Find("NavUI").Find("TargetMarker").LookAt(target);
+        //zmien ilosc procentow widoczna w interfejsie
+        TextMeshPro shieldText = 
+            GameObject.Find("Canvas").transform.Find("ShieldCapacityText").GetComponent<TextMeshPro>();
+        shieldText.text = "Shield: " + shieldCapacity.ToString() + "%";
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -73,9 +83,14 @@ public class PlayerControler : MonoBehaviour
         //sprawdz czy dotknelismy asteroidy
         if (collision.collider.transform.CompareTag("Asteroid"))
         {
-            Debug.Log("Boom!");
-            //pauza
-            Time.timeScale = 0;
+            //transform asteroidy
+           Transform asteroid = collision.collider.transform;
+            //policz wektor wedlug ktorego odepchniemy asteroide
+            Vector3 shieldForce = asteroid.position - transform.position;
+            //popchnij asteroide
+            asteroid.GetComponent<Rigidbody>().AddForce(shieldForce * 5, ForceMode.Impulse);
+            shieldCapacity -= 0.25f;
+           
         }
     }
 }
