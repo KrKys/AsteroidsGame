@@ -20,6 +20,9 @@ public class AsteroidSpawner : MonoBehaviour
     //odleg³oœæ pomiêdzy asteroidami
     public float safeDistance = 10;
 
+    //odstêp pomiedzy spawnem kolejnych asteroid
+    public float cooldown = 0;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -33,12 +36,19 @@ public class AsteroidSpawner : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        SpawnAsteroid(staticAsteroid);
-        
+        if (timeSinceSpawn > cooldown)
+        {
+            SpawnAsteroid(staticAsteroid);
+            timeSinceSpawn = 0;
+        }
+
+
         AsteroidCountControll();
+
+        timeSinceSpawn += Time.deltaTime;
     }
 
-    GameObject? SpawnAsteroid(GameObject prefab)
+    void SpawnAsteroid(GameObject prefab)
     {
         //generyczna funkcja sluzaca do wylosowania wspolrzednych i umieszczenia
         //w tym miejscu asteroidy z prefaba
@@ -54,19 +64,12 @@ public class AsteroidSpawner : MonoBehaviour
         randomPosition += player.position;
 
         //sprawdz czy miejsce jest wolne
-        //! oznacza "nie" czyli nie ma nic w promieniu 5 jednostek od miejsca randomPosition
-        if(!Physics.CheckSphere(randomPosition, safeDistance))
+        //! oznacza "nie" czyli nie ma nic w promieniu jednostek od miejsca randomPosition
+        if (!Physics.CheckSphere(randomPosition, safeDistance))
         {
             //stworz zmienn¹ asteroid, zespawnuj nowy asteroid korzystaj¹c z prefaba
             // w losowym miejscu, z rotacj¹ domyœln¹ (Quaternion.identity)
             GameObject asteroid = Instantiate(staticAsteroid, randomPosition, Quaternion.identity);
-
-            //zwróæ asteroidê jako wynik dzia³ania
-            return asteroid;
-        }
-        else
-        {
-            return null;
         }
 
     }
@@ -87,7 +90,7 @@ public class AsteroidSpawner : MonoBehaviour
             //magnitude to dugoœæ wektora = odleg³oœæ od gracza
             float distanceToPlayer = delta.magnitude;
 
-            if( distanceToPlayer > 30 )
+            if (distanceToPlayer > 30)
             {
                 Destroy(asteroid);
             }
